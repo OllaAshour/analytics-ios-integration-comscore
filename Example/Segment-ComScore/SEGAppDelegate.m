@@ -18,17 +18,27 @@
     [SEGAnalytics debug:YES];
 
     SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:@"ACIG3kwqCUsWZBfYxZDu0anuGwP3XtWW"];
-    configuration.trackApplicationLifecycleEvents = YES;
-    configuration.trackAttributionData = YES;
+//    configuration.trackApplicationLifecycleEvents = YES;
+//    configuration.trackAttributionData = YES;
     configuration.flushAt = 1;
     [configuration use:[SEGComScoreIntegrationFactory instance]];
 
     [SEGAnalytics setupWithConfiguration:configuration];
 
-    [[SEGAnalytics sharedAnalytics] identify:@"234"];
-    [[SEGAnalytics sharedAnalytics] track:@"comScore Example Launched"];
-    [[SEGAnalytics sharedAnalytics] track:@"comScore Example Testing"];
-    [[SEGAnalytics sharedAnalytics] track:@"comScore Example Testing 2"];
+//    [[SEGAnalytics sharedAnalytics] identify:@"234"];
+//    [[SEGAnalytics sharedAnalytics] track:@"comScore Example Launched"];
+//    [[SEGAnalytics sharedAnalytics] track:@"comScore Example Testing"];
+//    [[SEGAnalytics sharedAnalytics] track:@"comScore Example Testing 2"];
+    [[SEGAnalytics sharedAnalytics] track:@"Video Playback Started"
+                               properties:nil
+                                  options:@{
+                                      @"integrations": @{
+                                              @"comScore": @{
+                                                      @"c4":@"testing"
+                                              }
+                                      }
+                                  }];
+    
 
     [[SEGAnalytics sharedAnalytics] flush];
     return YES;
