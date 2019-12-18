@@ -61,7 +61,7 @@ describe(@"SEGComScoreIntegration", ^{
         SEGMockStreamingAnalyticsFactory *mockStreamAnalyticsFactory = [[SEGMockStreamingAnalyticsFactory alloc] init];
         mockStreamAnalyticsFactory.streamingAnalytics = mockStreamingAnalytics;
 
-        [given(mockStreamingAnalytics.configuration) willReturn:mockConfiguration];
+        mockConfiguration = mock([SCORStreamingConfiguration class]);
 
         integration = [[SEGComScoreIntegration alloc] initWithSettings:@{
             @"c2" : @"23243060"
@@ -153,6 +153,9 @@ describe(@"SEGComScoreIntegration", ^{
 
 
         it(@"videoPlaybackStarted", ^{
+          
+            [given([integration.streamAnalytics configuration]) willReturn:mockConfiguration];
+            
             SEGTrackPayload *payload = [[SEGTrackPayload alloc] initWithEvent:@"Video Playback Started" properties:@{
                 @"content_asset_id" : @"1234",
                 @"ad_type" : @"pre-roll",
@@ -163,14 +166,18 @@ describe(@"SEGComScoreIntegration", ^{
 
             [integration track:payload];
             
-            
             [verify(mockStreamingAnalytics) createPlaybackSession];
             
-            SCORStreamingContentMetadata *contentMetaData = [SCORStreamingContentMetadata contentMetadataWithBuilderBlock:^(SCORStreamingContentMetadataBuilder *builder) {
-                [builder setCustomLabels:@{ @"ns_st_ci" : @"1234"}];
-            }];
+            NSDictionary *assets = @{@"ns_st_mp" : @"youtube"};
             
-         //   [verify(mockStreamingAnalytics) setMetadata:contentMetaData]; //Not working
+            [verify([mockStreamingAnalytics configuration]) addLabels: assets];
+          
+            
+            //            SCORStreamingContentMetadata *contentMetaData = [SCORStreamingContentMetadata contentMetadataWithBuilderBlock:^(SCORStreamingContentMetadataBuilder *builder) {
+            //                [builder setCustomLabels:@{ @"ns_st_ci" : @"1234"}];
+            //            }];
+        
+        //  [verify(mockStreamingAnalytics) setMetadata:contentMetaData]; //Not working
 //
         });
 
@@ -237,7 +244,7 @@ describe(@"SEGComScoreIntegration", ^{
                                                             }];
             }];
            
-            [verify(mockStreamingAnalytics) setMetadata:contentMetaData]; //Not working
+           [verify(mockStreamingAnalytics) setMetadata:contentMetaData]; //Not working
         });
 
         it(@"videoPlaybackInterrupted with playPosition", ^{

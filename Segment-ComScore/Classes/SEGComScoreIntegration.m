@@ -39,6 +39,7 @@
         
         SCORAnalytics.configuration.applicationName = settings[@"appName:"];
         
+        
         NSInteger usageConfigurationProperty = SCORUsagePropertiesAutoUpdateModeDisabled;
         
         if ([(NSNumber *)[self.settings objectForKey:@"autoUpdate"] boolValue] && [(NSNumber *)[self.settings objectForKey:@"foregroundOnly"] boolValue]) {
@@ -271,15 +272,19 @@ NSDictionary *returnMappedPlaybackProperties(NSDictionary *properties, NSDiction
     self.streamAnalytics = [self.streamingAnalyticsFactory create];
 
     NSDictionary *map = @{
-        @"ns_st_mp" : properties[@"video_player"] ?: @"*null",
-        @"ns_st_ci" : properties[@"content_asset_id"] ?: @"0"
+        @"ns_st_mp" : properties[@"video_player"] ?: @"*null"
     };
 
     [self.streamAnalytics createPlaybackSession];
     
-    SEGLog(@"[[SCORStreamingAnalytics streamAnalytics] createPlaybackSessionW]");
-
-    [self addMetaDataAssets:map withOptions:integrations];
+    SEGLog(@"[[SCORStreamingAnalytics streamAnalytics] createPlaybackSession]");
+    
+   
+    [self.streamAnalytics.configuration  addLabels:map];
+   // [self.streamAnalytics.configuration setLabelWithName: @"ns_st_ci" value: properties[@"content_asset_id"] ?: @"0" ];
+ 
+     // The label ns_st_ci must be set through a setAsset call
+    [self addMetaDataAssets:@{@"ns_st_ci" : properties[@"content_asset_id"] ?: @"0"} withOptions:integrations];
     
     SEGLog(@"[[SCORStreamingAnalytics streamAnalytics] addMetaDataAssets: %@]", map);
 }
@@ -287,7 +292,9 @@ NSDictionary *returnMappedPlaybackProperties(NSDictionary *properties, NSDiction
 
 - (void)videoPlaybackPaused:(NSDictionary *)properties withOptions:(NSDictionary *)integrations
 {
-    [self addMetaDataAssets:properties withOptions:integrations];
+    NSDictionary *map = returnMappedPlaybackProperties(properties, integrations);
+    [self.streamAnalytics.configuration addLabels:map];
+   // [self addMetaDataAssets:properties withOptions:integrations];
     [self.streamAnalytics notifyPause];
     SEGLog(@"[[SCORStreamingAnalytics streamAnalytics] notifyPause]");
 }
